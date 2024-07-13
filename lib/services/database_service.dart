@@ -11,25 +11,35 @@ class DatabaseService {
     return _database!;
   }
 
-  initDB() async {
+  Future<Database> initDB() async {
     String path = join(await getDatabasesPath(), 'reports_database.db');
-    return await openDatabase(path, version: 1, onCreate: (db, version) async {
-      await db.execute('''
-        CREATE TABLE reports(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          title TEXT,
-          description TEXT,
-          date TEXT,
-          imagePaths TEXT,
-          "group" TEXT
-        )
-      ''');
-    });
+    return await openDatabase(
+      path,
+      version: 2, // Incrementa la versión
+      onCreate: (db, version) async {
+        await db.execute('''
+          CREATE TABLE reports(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            description TEXT,
+            date TEXT,
+            imagePaths TEXT,
+            "group" TEXT
+          )
+        ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE reports ADD COLUMN "group" TEXT');
+        }
+      },
+    );
   }
 
   Future<Report> insertReport(Report report) async {
     final db = await database;
     report.id = await db.insert('reports', report.toMap());
+    print('Reporte insertado con id: ${report.id}');
     return report;
   }
 

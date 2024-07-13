@@ -108,6 +108,7 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
                     description: _description,
                     date: DateTime.now().toIso8601String(),
                     imagePaths: _images.map((file) => file.path).toList(),
+                    group: ("ejemplo de grupo"),
                   );
                   Provider.of<ReportService>(context, listen: false)
                       .addReport(newReport);
